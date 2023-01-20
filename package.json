@@ -1,0 +1,35 @@
+{
+	"name": "server",
+	"version": "1.0.0",
+	"description": "library server",
+	"main": "index.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "ts-node src/index.ts",
+		"dev": "nodemon --watch src -e ts --exec ts-node src/index.ts"
+	},
+	"author": "romulo.gomes.mendes@hotmail.com",
+	"license": "ISC",
+	"dependencies": {
+		"@types/express": "^4.17.15",
+		"class-validator": "^0.14.0",
+		"cors": "^2.8.5",
+		"express": "^4.18.2",
+		"ts-node": "^10.9.1",
+		"uuid": "^9.0.0",
+		"yup": "^0.32.11"
+	},
+	"devDependencies": {
+		"@types/cors": "^2.8.13",
+		"@types/node": "^18.11.18",
+		"@types/uuid": "^9.0.0",
+		"@typescript-eslint/eslint-plugin": "^5.48.1",
+		"@typescript-eslint/parser": "^5.48.1",
+		"eslint": "^8.31.0",
+		"eslint-config-prettier": "^8.6.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"nodemon": "^2.0.20",
+		"prettier": "^2.8.2",
+		"typescript": "^4.9.4"
+	}
+}
