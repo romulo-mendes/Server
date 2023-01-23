@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction } from 'express';
 import { Request, Response } from 'express';
 import * as Yup from 'yup';
 import cors = require('cors');
@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BookType, rentHistoryType, UserType } from './models/books';
 import { books, users } from './data';
 import { BookSchema, RentHistorySchema, UserSchema } from './validation/validation';
+import { nextTick } from 'process';
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
@@ -22,32 +23,53 @@ app.get('/books', (req: Request, resp: Response) => {
   resp.json(books);
 });
 
-app.get('/book/:id', (req: Request, resp: Response) => {
-  const { id } = req.params;
-  const bookIndex = books.findIndex(p => p.id === id);
-  if (bookIndex < 0) {
-    return resp.status(404).json({ error: 'Livro não encontrado' });
+app.get('/books/rent', async (req: Request, resp: Response, next: NextFunction) => {
+  try {
+    const rentHistory = books.flatMap(book =>
+      book.rentHistory.map(history => ({
+        studentName: history.studentName,
+        class: history.class,
+        tittle: book.tittle,
+        withdrawalDate: history.withdrawalDate,
+        deliveryDate: history.deliveryDate,
+      }))
+    );
+    resp.json({ rentHistory });
+  } catch (error) {
+    next(error);
   }
-  resp.json(books[bookIndex]);
 });
 
-app.post('/book', async (req: Request, resp: Response) => {
+app.get('/books/:id', (next: NextFunction, req: Request, resp: Response) => {
+  try {
+    const { id } = req.params;
+    const bookIndex = books.findIndex(p => p.id === id);
+    if (bookIndex < 0) {
+      return resp.status(404).json({ error: 'Livro não encontrado' });
+    }
+    resp.json(books[bookIndex]);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/book', async (next: NextFunction, req: Request, resp: Response) => {
   try {
     await BookSchema.validate(req.body, { abortEarly: false });
     const book: BookType = req.body;
     if (!book.id) book.id = uuidv4();
     books.push(book);
     resp.status(201).json({ books, message: 'Livro adicionado com sucesso!' });
-  } catch (err) {
-    if (err instanceof Yup.ValidationError) {
-      resp.status(400).json({ error: err.errors });
+  } catch (error) {
+    if (error instanceof Yup.ValidationError) {
+      resp.status(400).json({ error: error.errors });
     } else {
-      resp.status(500).json({ error: 'Erro no servidor' });
+      next(error);
     }
   }
 });
 
-app.put('/book/:id', async (req: Request, resp: Response) => {
+app.put('/books/:id', async (next: NextFunction, req: Request, resp: Response) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) {
@@ -58,16 +80,16 @@ app.put('/book/:id', async (req: Request, resp: Response) => {
     const book: BookType = req.body;
     books[bookIndex] = book;
     resp.json({ book, message: 'Livro editado com sucesso!' });
-  } catch (err) {
-    if (err instanceof Yup.ValidationError) {
-      resp.status(400).json({ message: err.errors });
+  } catch (error) {
+    if (error instanceof Yup.ValidationError) {
+      resp.status(400).json({ message: error.errors });
     } else {
-      resp.status(500).json({ error: 'Erro no servidor' });
+      next(error);
     }
   }
 });
 
-app.post('/book/:id/rent', async (req: Request, resp: Response) => {
+app.post('/books/:id/rent', async (req: Request, resp: Response) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) return resp.status(404).json({ error: 'Livro não encontrado' });
@@ -87,7 +109,7 @@ app.post('/book/:id/rent', async (req: Request, resp: Response) => {
   }
 });
 
-app.put('/book/:id/rent', async (req: Request, resp: Response) => {
+app.put('/books/:id/rent', async (req: Request, resp: Response) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) return resp.status(404).json({ error: 'Livro não encontrado' });
@@ -108,7 +130,7 @@ app.put('/book/:id/rent', async (req: Request, resp: Response) => {
   }
 });
 
-app.patch('/book/:id/rent', async (req: Request, resp: Response) => {
+app.patch('/books/:id/rent', async (req: Request, resp: Response) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) return resp.status(404).json({ error: 'Livro não encontrado' });
@@ -123,24 +145,7 @@ app.patch('/book/:id/rent', async (req: Request, resp: Response) => {
   }
 });
 
-app.get('/books/rent', async (req: Request, resp: Response) => {
-  try {
-    const rentHistory = books.flatMap(book =>
-      book.rentHistory.map(history => ({
-        studentName: history.studentName,
-        class: history.class,
-        tittle: book.tittle,
-        withdrawalDate: history.withdrawalDate,
-        deliveryDate: history.deliveryDate,
-      }))
-    );
-    resp.json({ rentHistory });
-  } catch (err) {
-    resp.status(500).json({ err });
-  }
-});
-
-app.get('/book/:id/rent', async (req: Request, resp: Response) => {
+app.get('/books/:id/rent', async (req: Request, resp: Response) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) return resp.status(404).json({ error: 'Livro não encontrado' });
@@ -152,7 +157,7 @@ app.get('/book/:id/rent', async (req: Request, resp: Response) => {
   }
 });
 
-app.patch('/book/:id/status', async (req: Request, resp: Response) => {
+app.patch('/books/:id/status', async (req: Request, resp: Response) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) return resp.status(404).json({ error: 'Livro não encontrado' });
@@ -189,6 +194,10 @@ app.post('/user', async (req: Request, resp: Response) => {
       resp.status(500).json({ error: 'Erro no servidor' });
     }
   }
+});
+
+app.use((error: Error, req: Request, resp: Response, next: NextFunction) => {
+  resp.status(500).json({ error: error.message });
 });
 
 app.listen(3000, () => {
