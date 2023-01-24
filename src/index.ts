@@ -1,5 +1,4 @@
-import express, { NextFunction } from 'express';
-import { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import * as Yup from 'yup';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,6 +17,16 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+function errorHandler(err: any, req: Request, resp: Response, next: NextFunction) {
+  if (err instanceof Yup.ValidationError) {
+    resp.status(400).json({ error: err.errors });
+  } else {
+    resp.status(err.status || 500).json({ error: err.message });
+  }
+}
+
+app.use(errorHandler);
+
 app.get('/books', (req: Request, resp: Response) => {
   resp.json(books);
 });
@@ -35,7 +44,7 @@ app.get('/books/rent', async (req: Request, resp: Response, next: NextFunction) 
     );
     resp.json({ rentHistory });
   } catch (error) {
-    next();
+    next(error);
   }
 });
 
@@ -88,7 +97,7 @@ app.put('/books/:id', async (req: Request, resp: Response, next: NextFunction) =
   }
 });
 
-app.post('/books/:id/rent', async (req: Request, resp: Response) => {
+app.post('/books/:id/rent', async (req: Request, resp: Response, next: NextFunction) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) return resp.status(404).json({ error: 'Livro não encontrado' });
@@ -99,16 +108,16 @@ app.post('/books/:id/rent', async (req: Request, resp: Response) => {
     const rent: rentHistoryType = req.body;
     books[bookIndex].rentHistory.push(rent);
     resp.status(201).json({ books, message: 'Livro emprestado com sucesso!' });
-  } catch (err) {
-    if (err instanceof Yup.ValidationError) {
-      resp.status(400).json({ error: err.errors });
+  } catch (error) {
+    if (error instanceof Yup.ValidationError) {
+      resp.status(400).json({ error: error.errors });
     } else {
-      resp.status(500).json({ error: 'Erro no servidor' });
+      next(error);
     }
   }
 });
 
-app.put('/books/:id/rent', async (req: Request, resp: Response) => {
+app.put('/books/:id/rent', async (req: Request, resp: Response, next: NextFunction) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) return resp.status(404).json({ error: 'Livro não encontrado' });
@@ -120,11 +129,11 @@ app.put('/books/:id/rent', async (req: Request, resp: Response) => {
     books[bookIndex].rentHistory[books[bookIndex].rentHistory.length - 1] = rent;
     const book = books[bookIndex];
     resp.status(201).json({ book, message: 'Livro emprestado com sucesso!' });
-  } catch (err) {
-    if (err instanceof Yup.ValidationError) {
-      resp.status(400).json({ error: err.errors });
+  } catch (error) {
+    if (error instanceof Yup.ValidationError) {
+      resp.status(400).json({ error: error.errors });
     } else {
-      resp.status(500).json({ error: 'Erro no servidor' });
+      next(error);
     }
   }
 });
@@ -193,10 +202,6 @@ app.post('/user', async (req: Request, resp: Response) => {
       resp.status(500).json({ error: 'Erro no servidor' });
     }
   }
-});
-
-app.use((error: Error, req: Request, resp: Response, next: NextFunction) => {
-  resp.status(500).json({ error: error });
 });
 
 app.listen(3000, () => {
