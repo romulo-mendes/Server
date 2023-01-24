@@ -1,13 +1,12 @@
 import express, { NextFunction } from 'express';
 import { Request, Response } from 'express';
 import * as Yup from 'yup';
-import cors = require('cors');
+import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { BookType, rentHistoryType, UserType } from './models/books';
 import { books, users } from './data';
 import { BookSchema, RentHistorySchema, UserSchema } from './validation/validation';
-import { nextTick } from 'process';
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
@@ -36,11 +35,11 @@ app.get('/books/rent', async (req: Request, resp: Response, next: NextFunction) 
     );
     resp.json({ rentHistory });
   } catch (error) {
-    next(error);
+    next();
   }
 });
 
-app.get('/books/:id', (next: NextFunction, req: Request, resp: Response) => {
+app.get('/books/:id', (req: Request, resp: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const bookIndex = books.findIndex(p => p.id === id);
@@ -53,7 +52,7 @@ app.get('/books/:id', (next: NextFunction, req: Request, resp: Response) => {
   }
 });
 
-app.post('/book', async (next: NextFunction, req: Request, resp: Response) => {
+app.post('/book', async (req: Request, resp: Response, next: NextFunction) => {
   try {
     await BookSchema.validate(req.body, { abortEarly: false });
     const book: BookType = req.body;
@@ -69,7 +68,7 @@ app.post('/book', async (next: NextFunction, req: Request, resp: Response) => {
   }
 });
 
-app.put('/books/:id', async (next: NextFunction, req: Request, resp: Response) => {
+app.put('/books/:id', async (req: Request, resp: Response, next: NextFunction) => {
   const { id } = req.params;
   const bookIndex = books.findIndex(p => p.id === id);
   if (bookIndex < 0) {
@@ -197,7 +196,7 @@ app.post('/user', async (req: Request, resp: Response) => {
 });
 
 app.use((error: Error, req: Request, resp: Response, next: NextFunction) => {
-  resp.status(500).json({ error: error.message });
+  resp.status(500).json({ error: error });
 });
 
 app.listen(3000, () => {
