@@ -36,10 +36,10 @@ app.use(cors(corsOptions));
 function authenticateToken(req: Request, resp: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  if (token == null) return resp.sendStatus(401);
-  jwt.verify(token, process.env.TOKEN_SECRET as string, (err: any) => {
-    console.log(err);
-    if (err) return resp.sendStatus(403);
+  if (token == null) return resp.status(401).json({ message: 'Token não encontrado' });
+  jwt.verify(token, process.env.TOKEN_SECRET as string, (error: any) => {
+    console.log(error);
+    if (error) return resp.status(403).json({ message: 'Token inválido' });
     next();
   });
 }
@@ -207,7 +207,7 @@ app.post('/user', async (req: Request, resp: Response, next: NextFunction) => {
   }
 });
 
-app.post('/validate-token', authenticateToken, (req: Request, resp: Response) => {
+app.get('/validate-token', authenticateToken, (req: Request, resp: Response) => {
   resp.status(200).json({ message: 'Token is valid' });
 });
 
