@@ -35,15 +35,15 @@ After installing the dependencies and starting the servers, the server will be r
 
 ## Routes
 
-**Method GET "/books"** - Route used to return a list of all books.
-**Method GET "/books/rent"** - Route used to return a list of all rent history of books.
-**Method GET "/books/:id"** - Route used to return a specific book by id.
-**Method POST "/books"** - Route used to add a new book with validation.
-**Method PUT "/books/:id"** - Route used to edit a specific book by id with validation.
-**Method POST "/books/:id/rent"** - Route used to add a rent history for a specific book by id with validation.
-**Method PUT "/books/:id/rent"** - Route used to rent a book by its id.
-**Method PATCH "/books/:id/rent"** - Route used to return a book by its id.
-**Method GET "/books/:id/rent"** - Route used to get the rent history of a book by its id.
-**Method PATCH "/books/:id/status"** - Route used to update a book status by its id.
-**Method POST "/user"** - Route used to validate a user and generate an access token if the user is valid.
-**Method GET "/validate-token"** - Route used to validate an access token.
+**Method GET "/books"** - Route used to return a list of all books.  
+**Method GET "/books/rent"** - Route used to return a list of all rent history of books.  
+**Method GET "/books/:id"** - Route used to return a specific book by id.  
+**Method POST "/books"** - Route used to add a new book with validation.  
+**Method PUT "/books/:id"** - Route used to edit a specific book by id with validation.  
+**Method POST "/books/:id/rent"** - Route used to add a rent history for a specific book by id with validation.  
+**Method PUT "/books/:id/rent"** - Route used to rent a book by its id.  
+**Method PATCH "/books/:id/rent"** - Route used to return a book by its id.  
+**Method GET "/books/:id/rent"** - Route used to get the rent history of a book by its id.  
+**Method PATCH "/books/:id/status"** - Route used to update a book status by its id.  
+**Method POST "/user"** - Route used to validate a user and generate an access token if the user is valid.  
+**Method GET "/validate-token"** - Route used to validate an access token.  
