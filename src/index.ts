@@ -1,7 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import * as Yup from 'yup';
 import cors from 'cors';
-import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
@@ -15,7 +14,7 @@ const app = express();
 app.use(express.json({ limit: '1mb' }));
 
 const secret = crypto.randomBytes(64).toString('hex');
-fs.writeFileSync('.env', `TOKEN_SECRET=${secret}\n`, { flag: 'a' });
+fs.writeFileSync('.env', `TOKEN_SECRET=${secret}\n`);
 dotenv.config();
 
 function generateAccessToken(email: string) {
@@ -44,7 +43,7 @@ function authenticateToken(req: Request, resp: Response, next: NextFunction) {
   });
 }
 
-app.get('/books', authenticateToken, (req: Request, resp: Response) => {
+app.get('/books', (req: Request, resp: Response) => {
   resp.json(books);
 });
 
@@ -82,7 +81,7 @@ app.post('/book', async (req: Request, resp: Response, next: NextFunction) => {
   try {
     await BookSchema.validate(req.body, { abortEarly: false });
     const book: BookType = req.body;
-    if (!book.id) book.id = uuidv4();
+    book.id = crypto.randomBytes(64).toString('hex');
     books.push(book);
     resp.status(201).json({ books, message: 'Livro adicionado com sucesso!' });
   } catch (error) {
