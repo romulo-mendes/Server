@@ -1,4 +1,5 @@
-import { BookType, UserType } from './models/books';
+import { BookType } from './models/books';
+import { UserType } from './models/users';
 
 export const books: BookType[] = [
   {

@@ -22,11 +22,6 @@ export type BookType = {
   rentHistory: rentHistoryType[];
 };
 
-export type UserType = {
-  email: string;
-  password: string;
-};
-
 export type allRentType = {
   studentName: string;
   class: string;
