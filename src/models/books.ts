@@ -29,3 +29,21 @@ export type allRentType = {
   withdrawalDate: Date;
   deliveryDate: Date;
 };
+
+interface IBook {
+  books: BookType[];
+  getById(id: string): BookType | undefined;
+  getId(id: string): number;
+}
+
+export class Book implements IBook {
+  public constructor(public books: BookType[]) {}
+
+  public getById(id: string): BookType | undefined {
+    return this.books.find(book => book.id === id);
+  }
+
+  public getId(id: string): number {
+    return this.books.findIndex(book => book.id === id);
+  }
+}
